@@ -6,6 +6,8 @@ from pyrogram.types import Message
 from pyrogram import Client, filters  # Import Client
 from config import ADMINS, BOT_STATS_TEXT, USER_REPLY_TEXT
 from helper_func import get_readable_time
+from pyrogram.enums.parse_mode import ParseMode
+
 
 # MongoDB URI
 DB_URI = "mongodb+srv://knight_rider:GODGURU12345@knight.jm59gu9.mongodb.net/?retryWrites=true&w=majority"
@@ -46,6 +48,7 @@ async def get_db_response_time() -> float:
     end = time.time()
     return round((end - start) * 1000, 2)  # DB response time in milliseconds
 
+
 @Bot.on_message(filters.command('users_list') & filters.user(ADMINS))
 async def users_list(bot: Bot, message: Message):
     users = await db['users'].find().to_list(length=None)  # Fetch all users
@@ -68,7 +71,7 @@ async def users_list(bot: Bot, message: Message):
 
     users_text += "╚─────────────╝"
 
-    await message.reply(users_text, parse_mode="HTML")
+    await message.reply(users_text, parse_mode=ParseMode.HTML)
 
 # Function to add user to the database
 async def add_user(user_id: int, username: str):
