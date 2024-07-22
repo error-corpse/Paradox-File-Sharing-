@@ -10,7 +10,6 @@ from helper_func import get_readable_time
 # MongoDB URI
 DB_URI = "mongodb+srv://knight_rider:GODGURU12345@knight.jm59gu9.mongodb.net/?retryWrites=true&w=majority"
 
-
 mongo_client = AsyncIOMotorClient(DB_URI)
 db = mongo_client['paradoXstr']
 
@@ -19,7 +18,8 @@ async def get_ping(bot: Bot) -> float:
     start = time.time()
     await bot.get_me()  # Simple call to measure round-trip time
     end = time.time()
-    return round((end - start) * 1000, 2)  
+    return round((end - start) * 1000, 2)
+
 
 @Bot.on_message(filters.command('stats') & filters.user(ADMINS))
 async def stats(bot: Bot, message: Message):
@@ -39,6 +39,7 @@ async def stats(bot: Bot, message: Message):
 
     await message.reply(stats_text)
 
+
 # Function to measure DB response time
 async def get_db_response_time() -> float:
     start = time.time()
@@ -47,7 +48,53 @@ async def get_db_response_time() -> float:
     end = time.time()
     return round((end - start) * 1000, 2)  # DB response time in milliseconds
 
+
 @Bot.on_message(filters.private & filters.incoming)
-async def useless(_,message: Message):
+async def useless(_, message: Message):
     if USER_REPLY_TEXT:
         await message.reply(USER_REPLY_TEXT)
+
+
+# /users_list command
+@Bot.on_message(filters.command('users_list') & filters.user(ADMINS))
+async def users_list(bot: Bot, message: Message):
+    users = await db['users'].find().to_list(length=None)  # Fetch all users
+    if not users:
+        await message.reply("No users found.")
+        return
+
+    users_text = (
+        "┏━━━━━━━━━━━━━━━━━┓\n"
+        "ㅤㅤ   ㅤ  [ᴜsᴇʀs ʟɪsᴛ]ㅤㅤㅤㅤㅤ\n"
+        "┗━━━━━━━━━━━━━━━━━┛\n\n"
+        "╔─────────────╗\n"
+    )
+
+    for user in users:
+        user_name = user.get('username', 'Unknown')
+        user_id = user.get('user_id')
+        user_mention = f'<a href="tg://user?id={user_id}">{user_name}</a>'
+        users_text += f"» {user_mention}\n"
+
+    users_text += "╚─────────────╝"
+
+    await message.reply(users_text, parse_mode="HTML")
+
+
+# Function to add user to the database
+async def add_user(user_id: int, username: str):
+    await db['users'].update_one(
+        {'user_id': user_id},
+        {'$set': {'username': username}},
+        upsert=True
+    )
+
+
+# Modify the start command to add users to the database
+@Bot.on_message(filters.command('start') & filters.private)
+async def start_command(client: Client, message: Message):
+    user_id = message.from_user.id
+    username = message.from_user.username or "No Username"
+    await add_user(user_id, username)
+
+    await message.reply("Welcome! You are now using the bot.")
