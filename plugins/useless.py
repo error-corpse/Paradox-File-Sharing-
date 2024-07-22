@@ -66,14 +66,12 @@ async def users_list(bot: Bot, message: Message):
     for user in users:
         user_name = user.get('username', 'Unknown')
         user_id = user.get('user_id')
-        user_mention = f'<a href="tg://user?id={user_id}">{user_name}</a>'
-        users_text += f"» {user_mention}\n"
+        users_text += f"» {user_name} (`{user_id}`)\n"
 
     users_text += "╚─────────────╝"
 
-    await message.reply(users_text, parse_mode=ParseMode.HTML)
+    await message.reply(users_text, parse_mode="Markdown")
 
-# Function to add user to the database
 async def add_user(user_id: int, username: str):
     await db['users'].update_one(
         {'user_id': user_id},
