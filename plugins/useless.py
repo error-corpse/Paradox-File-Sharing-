@@ -70,7 +70,7 @@ async def users_list(bot: Bot, message: Message):
 
     users_text += "╚─────────────╝"
 
-    await message.reply(users_text, parse_mode="Markdown")
+    await message.reply(users_text, parse_mode="MarkdownV2")
 
 async def add_user(user_id: int, username: str):
     await db['users'].update_one(
