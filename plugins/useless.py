@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 from motor.motor_asyncio import AsyncIOMotorClient
 from pyrogram.types import Message
-from pyrogram import filters
+from pyrogram import Client, filters  # Import Client
 from config import ADMINS, BOT_STATS_TEXT, USER_REPLY_TEXT
 from helper_func import get_readable_time
 
@@ -19,7 +19,6 @@ async def get_ping(bot: Bot) -> float:
     await bot.get_me()  # Simple call to measure round-trip time
     end = time.time()
     return round((end - start) * 1000, 2)
-
 
 @Bot.on_message(filters.command('stats') & filters.user(ADMINS))
 async def stats(bot: Bot, message: Message):
@@ -39,7 +38,6 @@ async def stats(bot: Bot, message: Message):
 
     await message.reply(stats_text)
 
-
 # Function to measure DB response time
 async def get_db_response_time() -> float:
     start = time.time()
@@ -48,14 +46,6 @@ async def get_db_response_time() -> float:
     end = time.time()
     return round((end - start) * 1000, 2)  # DB response time in milliseconds
 
-
-@Bot.on_message(filters.private & filters.incoming)
-async def useless(_, message: Message):
-    if USER_REPLY_TEXT:
-        await message.reply(USER_REPLY_TEXT)
-
-
-# /users_list command
 @Bot.on_message(filters.command('users_list') & filters.user(ADMINS))
 async def users_list(bot: Bot, message: Message):
     users = await db['users'].find().to_list(length=None)  # Fetch all users
@@ -80,7 +70,6 @@ async def users_list(bot: Bot, message: Message):
 
     await message.reply(users_text, parse_mode="HTML")
 
-
 # Function to add user to the database
 async def add_user(user_id: int, username: str):
     await db['users'].update_one(
@@ -89,8 +78,6 @@ async def add_user(user_id: int, username: str):
         upsert=True
     )
 
-
-# Modify the start command to add users to the database
 @Bot.on_message(filters.command('start') & filters.private)
 async def start_command(bot: Bot, message: Message):
     user_id = message.from_user.id
@@ -98,3 +85,8 @@ async def start_command(bot: Bot, message: Message):
     await add_user(user_id, username)
 
     await message.reply("Welcome! You are now using the bot.")
+
+@Bot.on_message(filters.private & filters.incoming)
+async def useless(bot: Bot, message: Message):
+    if USER_REPLY_TEXT:
+        await message.reply(USER_REPLY_TEXT)
