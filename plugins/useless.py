@@ -92,7 +92,7 @@ async def add_user(user_id: int, username: str):
 
 # Modify the start command to add users to the database
 @Bot.on_message(filters.command('start') & filters.private)
-async def start_command(client: Client, message: Message):
+async def start_command(bot: Bot, message: Message):
     user_id = message.from_user.id
     username = message.from_user.username or "No Username"
     await add_user(user_id, username)
