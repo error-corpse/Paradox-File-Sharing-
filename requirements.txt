@@ -1,11 +1,11 @@
-# --- For-Bot-Working --------- #
+# ---- For-Bot-Working --------- #
 pyrogram==2.0.30
 TgCrypto
 pyromod==1.5
-# --- For-Database ------------ #
+# ---- For-Database ------------ #
 pymongo
 dnspython
-# --- For-Web-Response ------- #
+# ---- For-Web-Response ------- #
 aiohttp
 motor==3.3.2
 Flask==2.2.2
